@@ -18,10 +18,10 @@ global.r = {}
 global.s = {}
 
 --[[
-	key: player_index
-	value: 
-	{ has_received_starting_items: bool
-	}
+key: player_index
+value: 
+{ has_received_starting_items: bool
+}
 --]]
 global.player_state = {}
 
@@ -130,7 +130,7 @@ end
 local reset_global_setings__pre_surface_clear = function ()
 	-- Altering tiles during a surface clear causes desyncs, this is a known factorio bug.
 	-- See https://forums.factorio.com/viewtopic.php?f=230&t=113601
-
+	
 	-- [on_chunk_generated] checks [converted_shallow_water] to determine if to
 	-- convert water tiles immediately. We need to disable this flag before
 	-- reset, so that reset chunks are not touch until the surface clear is
@@ -149,7 +149,7 @@ local reset_global_settings__post_surface_clear = function()
 	game.forces["enemy"].reset()
 	game.forces["enemy"].reset_evolution()
 	game.pollution_statistics.clear()
-
+	
 	-- clear globals
 	global.latch = 0
 	global.exploder = "big-spitter"
@@ -163,7 +163,7 @@ local reset_global_settings__post_surface_clear = function()
 	global.s = {}
 	global.player_state = {}
 	-- [converted_shallow_water] is reset during [pre_surface_clear] above
-
+	
 	-- default starting map settings
 	game.map_settings.enemy_evolution.destroy_factor = 0
 	game.map_settings.enemy_evolution.pollution_factor = 0
@@ -179,7 +179,7 @@ local reset_global_settings__post_surface_clear = function()
 	game.map_settings.pollution.enemy_attack_pollution_consumption_modifier = 0.5
 	game.map_settings.unit_group.max_gathering_unit_groups = 30
 	game.map_settings.unit_group.max_unit_group_size = 300
-
+	
 	local surface = game.surfaces[1]
 	surface.brightness_visual_weights = { 1, 1, 1 }
 	surface.min_brightness = 0
@@ -189,30 +189,30 @@ local reset_global_settings__post_surface_clear = function()
 	surface.morning = 0.60
 	surface.daytime = 0.70
 	surface.freeze_daytime = false
-
+	
 	game.forces["enemy"].friendly_fire = false
 	game.forces["player"].research_queue_enabled = true
 	game.difficulty_settings.technology_price_multiplier = 1
 	game.difficulty_settings.recipe_difficulty = 1
-
---  game.map_settings.enemy_expansion.max_expansion_distance = 1
---  game.map_settings.enemy_expansion.friendly_base_influence_radius = 0
---	game.map_settings.enemy_expansion.enemy_building_influence_radius  = 0
---  game.map_settings.enemy_expansion.other_base_coefficient = 0
---	game.map_settings.enemy_expansion.building_coefficient = 0
---  game.map_settings.enemy_expansion.max_colliding_tiles_coefficient = 0
-
---	game.forces["player"].max_successful_attempts_per_tick_per_construction_queue = 10
---	game.forces["player"].max_failed_attempts_per_tick_per_construction_queue = 10
---	game.permissions.get_group('Default').set_allows_action(defines.input_action.add_permission_group, false)
---	game.permissions.get_group('Default').set_allows_action(defines.input_action.delete_permission_group, false)
---	game.permissions.get_group('Default').set_allows_action(defines.input_action.edit_permission_group, false)
---	game.permissions.get_group('Default').set_allows_action(defines.input_action.import_permissions_string, false)
---	game.permissions.get_group('Default').set_allows_action(defines.input_action.map_editor_action, false)
---	game.permissions.get_group('Default').set_allows_action(defines.input_action.toggle_map_editor, false)
---	game.permissions.create_group('Owner')
---	game.permissions.get_group('Owner').add_player("Atraps003")
-
+	
+	--  game.map_settings.enemy_expansion.max_expansion_distance = 1
+	--  game.map_settings.enemy_expansion.friendly_base_influence_radius = 0
+	--	game.map_settings.enemy_expansion.enemy_building_influence_radius  = 0
+	--  game.map_settings.enemy_expansion.other_base_coefficient = 0
+	--	game.map_settings.enemy_expansion.building_coefficient = 0
+	--  game.map_settings.enemy_expansion.max_colliding_tiles_coefficient = 0
+	
+	--	game.forces["player"].max_successful_attempts_per_tick_per_construction_queue = 10
+	--	game.forces["player"].max_failed_attempts_per_tick_per_construction_queue = 10
+	--	game.permissions.get_group('Default').set_allows_action(defines.input_action.add_permission_group, false)
+	--	game.permissions.get_group('Default').set_allows_action(defines.input_action.delete_permission_group, false)
+	--	game.permissions.get_group('Default').set_allows_action(defines.input_action.edit_permission_group, false)
+	--	game.permissions.get_group('Default').set_allows_action(defines.input_action.import_permissions_string, false)
+	--	game.permissions.get_group('Default').set_allows_action(defines.input_action.map_editor_action, false)
+	--	game.permissions.get_group('Default').set_allows_action(defines.input_action.toggle_map_editor, false)
+	--	game.permissions.create_group('Owner')
+	--	game.permissions.get_group('Owner').add_player("Atraps003")
+	
 end
 
 local reset_global_settings = function ()
@@ -222,12 +222,12 @@ end
 
 local handle_player_created_or_respawned = function(player_index)
 	local player = game.get_player(player_index)
-
+	
 	if global.player_state[player_index] == nil then
 		global.player_state[player_index] = default_player_state()
 	end
 	local player_state = global.player_state[player_index]
-
+	
 	if player_state.has_received_starting_items == false then
 		player_state.has_received_starting_items = true
 		util.insert_safe(player, global.created_items)
@@ -241,17 +241,17 @@ local on_player_created = function(event)
 	local name = player.name
 	local x = {ID = (event.player_index - 1), Name = name}
 	print(serpent.line(x))
-
+	
 	handle_player_created_or_respawned(event.player_index)
 	
 	if not global.init_ran then
-	-- This is so that other mods and scripts have a chance to do remote calls before we do things like charting the starting area, creating the crash site, etc.
+		-- This is so that other mods and scripts have a chance to do remote calls before we do things like charting the starting area, creating the crash site, etc.
 		global.init_ran = true
 		
 		reset_global_settings()
-
+		
 		--	map_gen_1()
-
+		
 		if not global.disable_crashsite then
 			local surface = player.surface
 			crash_site.create_crash_site(surface, {-5,-6}, util.copy(global.crashed_ship_items), util.copy(global.crashed_debris_items), util.copy(global.crashed_ship_parts))
@@ -406,12 +406,12 @@ function reset(reason)
 		local deaths = game.forces["player"].kill_count_statistics.get_output_count "character"
 		game.write_file("reset/reset.log", {"",victory,"_",red,"_",deaths}, false, 0)
 		change_seed()
-
+		
 		game.surfaces[1].clear(true)
-
+		
 		game.forces["player"].reset()
 	end
-
+	
 	if reason ~= nil then
 		game.print(string.format("%s [color=yellow]%s[/color]", reset_type, reason))
 	end
@@ -419,7 +419,7 @@ end
 -----------------------------------------------------------------------------------------------
 local on_pre_surface_cleared = function(event) 
 	reset_global_setings__pre_surface_clear()
-
+	
 	-- We need to kill all players _before_ the surface is cleared, so that
 	-- their inventory, and crafting queue, end up on the old surface
 	for _, pl in pairs(game.players) do
@@ -437,7 +437,7 @@ end
 -----------------------------------------------------------------------------------------------
 local on_surface_cleared = function(event)
 	reset_global_settings__post_surface_clear()
-
+	
 	local surface = game.surfaces[1]
 	--	game.forces["enemy"].kill_all_units()
 	surface.request_to_generate_chunks({0, 0}, 6)
@@ -447,7 +447,7 @@ end
 ------------------------------------------------------------------------------------------
 local on_player_toggled_map_editor = function(event)
 	global.restart = "true"
-
+	
 	local player = game.get_player(event.player_index)
 	reset(string.format("%s has toggled the map editor.", player.name))
 end
@@ -457,7 +457,7 @@ local on_console_command = function(event)
 	local parameters = event.parameters
 	print(command)
 	print(parameters)
-
+	
 	if (game.console_command_used and global.restart ~= "true") then
 		global.restart = "true"
 		local name = nil
@@ -468,135 +468,82 @@ local on_console_command = function(event)
 	end
 end
 --------------------------------------------------------------------------------------------
+local rewrite_biter_unit_group_behavior = function(group)
+	local next = next
+	local selection = {}
+	local selected = {}
+	local f_location = f_location()
+	local t_location = t_location()
+	local pu_location = pu_location()
+	local r_location = r_location()
+	local s_location = s_location()
+	local pl_location = pl_location()
+	table.insert(selection, f_location)
+	table.insert(selection, t_location)
+	table.insert(selection, pu_location)
+	table.insert(selection, r_location)
+	table.insert(selection, s_location)
+	if next(selection) ~= nil then
+		table.insert(selected, (selection[math.random(#selection)]))
+		if selected[1][1][3] == 1 then
+			--					game.print("EX F [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
+			local command = {type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}
+			group.set_command(command)
+		end
+		if selected[1][1][3] == 2 then
+			--					game.print("EX T [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
+			local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
+			group.set_command(command)
+			if math.random(1,3) == 2 then
+				global.t = {}
+			end
+		end
+		if selected[1][1][3] == 3 then
+			--					game.print("EX PU [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
+			local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
+			group.set_command(command)
+		end
+		if selected[1][1][3] == 4 then
+			--					game.print("EX R [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
+			local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
+			group.set_command(command)
+		end
+		if selected[1][1][3] == 6 then
+			--					game.print("EX S [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
+			local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
+			group.set_command(command)
+			if math.random(1,5) == 2 then
+				global.s = {}
+			end
+		end
+	end
+	if next(selected) == nil and next(pl_location) ~= nil then
+		table.insert(selected, pl_location)
+		--				game.print("EX PL [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
+		local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
+		group.set_command(command)
+	end
+	if next(selected) == nil then
+		table.insert(selected, {{0, 0}})
+		--				game.print("EX SPAWN [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
+		local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
+		group.set_command(command)
+	end
+end
+
 local on_unit_group_finished_gathering = function(event)
 	if event.group.command.ignore_planner == false then
+		-- Expansion group
 		if global.latch == 0 then
 			global.latch = 1
 		else
 			global.latch = 0
-			local next = next
-			local selection = {}
-			local selected = {}
-			local f_location = f_location()
-			local t_location = t_location()
-			local pu_location = pu_location()
-			local r_location = r_location()
-			local s_location = s_location()
-			local pl_location = pl_location()
-			table.insert(selection, f_location)
-			table.insert(selection, t_location)
-			table.insert(selection, pu_location)
-			table.insert(selection, r_location)
-			table.insert(selection, s_location)
-			if next(selection) ~= nil then
-				table.insert(selected, (selection[math.random(#selection)]))
-				if selected[1][1][3] == 1 then
-					--					game.print("EX F [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 2 then
-					--					game.print("EX T [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-					if math.random(1,3) == 2 then
-						global.t = {}
-					end
-				end
-				if selected[1][1][3] == 3 then
-					--					game.print("EX PU [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 4 then
-					--					game.print("EX R [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 6 then
-					--					game.print("EX S [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
-					event.group.set_command(command)
-					if math.random(1,5) == 2 then
-						global.s = {}
-					end
-				end
-			end
-			if next(selected) == nil and next(pl_location) ~= nil then
-				table.insert(selected, pl_location)
-				--				game.print("EX PL [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-				event.group.set_command(command)
-			end
-			if next(selected) == nil then
-				table.insert(selected, {{0, 0}})
-				--				game.print("EX SPAWN [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-				event.group.set_command(command)
-			end
+			rewrite_biter_unit_group_behavior(event.group)
 		end
 	else
+		-- Pollution or retaliation group
 		if math.random(1,2) == 2 then
-			local next = next
-			local selection = {}
-			local selected = {}
-			local f_location = f_location()
-			local t_location = t_location()
-			local pu_location = pu_location()
-			local r_location = r_location()
-			local s_location = s_location()
-			local pl_location = pl_location()
-			table.insert(selection, f_location)
-			table.insert(selection, t_location)
-			table.insert(selection, pu_location)
-			table.insert(selection, r_location)
-			table.insert(selection, s_location)
-			if next(selection) ~= nil then
-				table.insert(selected, (selection[math.random(#selection)]))
-				if selected[1][1][3] == 1 then
-					--					game.print("PO F [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 2 then
-					--					game.print("PO T [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-					if math.random(1,3) == 2 then
-						global.t = {}
-					end
-				end
-				if selected[1][1][3] == 3 then
-					--					game.print("PO PU [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 4 then
-					--					game.print("PO R [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-					event.group.set_command(command)
-				end
-				if selected[1][1][3] == 6 then
-					--					game.print("PO S [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-					local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.none,ignore_planner = true}}}
-					event.group.set_command(command)
-					if math.random(1,5) == 2 then
-						global.s = {}
-					end
-				end
-			end
-			if next(selected) == nil and next(pl_location) ~= nil then
-				table.insert(selected, pl_location)
-				--				game.print("PO PL [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-				event.group.set_command(command)
-			end
-			if next(selected) == nil then
-				table.insert(selected, {{0, 0}})
-				--				game.print("PO SPAWN [gps=" .. selected[1][1][1] .. "," .. selected[1][1][2] .. "]")
-				local command = {type = defines.command.compound,structure_type = defines.compound_command.return_last,commands ={{type = defines.command.go_to_location,destination = {selected[1][1][1], selected[1][1][2]}},{type = defines.command.attack_area,destination = {selected[1][1][1], selected[1][1][2]},radius = 16,distraction = defines.distraction.by_anything},{type = defines.command.build_base,destination = {selected[1][1][1], selected[1][1][2]},distraction = defines.distraction.by_anything,ignore_planner = true}}}
-				event.group.set_command(command)
-			end
+			rewrite_biter_unit_group_behavior(event.group)
 		end
 	end
 end
@@ -608,7 +555,7 @@ script.on_nth_tick(60, function()
 		for chunk in surface.get_chunks() do
 			convert_shallow_water_in_area(chunk.area)	
 		end
-
+		
 		chart_starting_area()
 	end
 end)
@@ -651,12 +598,12 @@ script.on_nth_tick(36000, function()
 	if (evo > 0.034) then
 		game.map_settings.enemy_expansion.settler_group_min_size = 90
 		game.map_settings.enemy_expansion.settler_group_max_size  = 100
-		end
-		---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		if game.ticks_played > 36288000 then
-			reset("Game has reached its maximum playtime of 7 days.")
-		end
-	end)
+	end
+	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	if game.ticks_played > 36288000 then
+		reset("Game has reached its maximum playtime of 7 days.")
+	end
+end)
 
 -------------------------------------------------------------------------------------------------------------------
 script.on_event(defines.events.on_post_entity_died,
@@ -850,22 +797,22 @@ local on_research_finished = function(event)
 	end
 	------------------------------------------------------------------------------------
 	if (event.research.name == "physical-projectile-damage-1") then
-	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+		game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
 	end
 	if (event.research.name == "physical-projectile-damage-2") then
-	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+		game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
 	end
 	if (event.research.name == "physical-projectile-damage-3") then
-	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+		game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
 	end
 	if (event.research.name == "physical-projectile-damage-4") then
-	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+		game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
 	end
 	if (event.research.name == "physical-projectile-damage-5") then
-	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+		game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
 	end
 	if (event.research.name == "physical-projectile-damage-6") then
-	game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
+		game.forces["player"].set_turret_attack_modifier("gun-turret", 0)
 	end
 	---------------------------------------------------------------------------------------------------------
 	--  if (event.research.name == "stronger-explosives-2") then
