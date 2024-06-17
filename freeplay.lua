@@ -587,9 +587,9 @@ end
 -------------------------------------------------------------------------------------------
 local on_tick = function()
 	-- Process scheduled tasks
-	-- if global.scheduled_actions == nil then 
-	-- 	global.scheduled_actions = priority_queue('min')
-	-- end
+	if global.scheduled_actions == nil then 
+		global.scheduled_actions = priority_queue('min')
+	end
 	while not global.scheduled_actions:empty() do 
 		local f, tick_to_run = global.scheduled_actions:peek()
 		if tick_to_run ~= nil and tick_to_run <= game.tick then
