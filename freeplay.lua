@@ -4,16 +4,6 @@ local crash_site = require("crash-site")
 
 local SHALLOW_WATER_CONVERSION_DELAY = 60
 
---[[
-Scheduled actions never are cleared out
-
-priority: tick to run
-value   : function()
---]]
-script.on_init(function () 
-	global.scheduled_actions = priority_queue('min')
-end)
-
 global.restart = "false"
 global.converted_shallow_water = false
 
@@ -587,9 +577,20 @@ local on_unit_group_finished_gathering = function(event)
 	end
 end
 -------------------------------------------------------------------------------------------
+--[[
+Scheduled actions never are cleared out
+
+priority: tick to run
+value   : function()
+--]]
+
 local on_tick = function()
 	-- Process scheduled tasks
-	while global.scheduled_actions ~= nil and not global.scheduled_actions:empty() do 
+	if global.scheduled_actions == nil then
+		global.scheduled_actions = priority_queue:new("min")
+	end
+
+	while not global.scheduled_actions:empty() do 
 		local f, tick_to_run = global.scheduled_actions:peek()
 		if tick_to_run ~= nil and tick_to_run <= game.tick then
 			f()
