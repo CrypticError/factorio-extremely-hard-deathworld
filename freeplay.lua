@@ -10,8 +10,6 @@ Scheduled actions never are cleared out
 priority: tick to run
 value   : function()
 --]]
-global.scheduled_actions = priority_queue('min')
-
 global.restart = "false"
 global.converted_shallow_water = false
 
@@ -587,9 +585,9 @@ end
 -------------------------------------------------------------------------------------------
 local on_tick = function()
 	-- Process scheduled tasks
-	if global.scheduled_actions == nil then 
-		global.scheduled_actions = priority_queue('min')
-	end
+	-- if global.scheduled_actions == nil then 
+	-- 	global.scheduled_actions = priority_queue('min')
+	-- end
 	while not global.scheduled_actions:empty() do 
 		local f, tick_to_run = global.scheduled_actions:peek()
 		if tick_to_run ~= nil and tick_to_run <= game.tick then
@@ -1332,6 +1330,7 @@ freeplay.on_init = function()
 	global.crashed_ship_items = ship_items()
 	global.crashed_debris_items = debris_items()
 	global.crashed_ship_parts = ship_parts()
+	global.scheduled_actions = priority_queue('min')
 	
 	if is_debug() then
 		global.skip_intro = true
