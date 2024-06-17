@@ -10,7 +10,9 @@ Scheduled actions never are cleared out
 priority: tick to run
 value   : function()
 --]]
-global.scheduled_actions = priority_queue('min')
+script.on_init(function () 
+	global.scheduled_actions = priority_queue('min')
+end)
 
 global.restart = "false"
 global.converted_shallow_water = false
