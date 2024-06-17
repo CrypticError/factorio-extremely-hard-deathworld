@@ -18,7 +18,7 @@ global.r = {}
 global.s = {}
 
 --[[
-	key: player_idnex
+	key: player_index
 	value: 
 	{ has_received_starting_items: bool
 	}
