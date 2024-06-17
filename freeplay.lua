@@ -1,7 +1,16 @@
 local util = require("util")
+local priority_queue = require("lib.priority_queue")
 local crash_site = require("crash-site")
 
 local SHALLOW_WATER_CONVERSION_DELAY = 60
+
+--[[
+Scheduled actions never are cleared out
+
+priority: tick to run
+value   : function()
+--]]
+global.scheduled_actions = priority_queue('min')
 
 global.restart = "false"
 global.converted_shallow_water = false
@@ -18,7 +27,7 @@ global.r = {}
 global.s = {}
 
 --[[
-key: player_index
+key  : player_index
 value: 
 { has_received_starting_items: bool
 }
@@ -120,6 +129,16 @@ local change_seed = function()
 	surface.map_gen_settings = mgs
 end
 -------------------------------------------------------------------------------------------------------------------------------
+local convert_shallow_water = function ()
+	if not global.converted_shallow_water and game.ticks_played >= SHALLOW_WATER_CONVERSION_DELAY then
+		global.converted_shallow_water = true
+		for chunk in game.surfaces[1].get_chunks() do
+			convert_shallow_water_in_area(chunk.area)	
+		end
+		
+		chart_starting_area()
+	end
+end
 
 -- Some values need to be reset pre-surface clear, and some need to be set
 -- post-surface clear.
@@ -136,6 +155,18 @@ local reset_global_setings__pre_surface_clear = function ()
 	-- reset, so that reset chunks are not touch until the surface clear is
 	-- fully complete.
 	global.converted_shallow_water = false
+	
+	-- This scheduler should work properly. 
+	--
+	-- Even if multiple instances of [convert_shallow_water] is called, it will
+	-- only run once per reset, as [global.converted_shallow_water] ensures
+	-- this. 
+	--
+	-- Additionally, if a lingering [convert_shallow_water] meant for an old
+	-- reset runs before [SHALLOW_WATER_CONVERSION_DELAY] on a latter surface,
+	-- it will not alter tiles as there is also a check ensuring
+	-- [game.ticks_played] is long enough post reset.
+	global.scheduled_actions:enqueue(convert_shallow_water, game.tick +	SHALLOW_WATER_CONVERSION_DELAY)
 	
 	-- We reset time played before clearing the surface. That way,
 	-- the periodic check that converts all water tiles does not fire until
@@ -412,9 +443,16 @@ function reset(reason)
 		game.forces["player"].reset()
 	end
 	
-	if reason ~= nil then
-		game.print(string.format("%s [color=yellow]%s[/color]", reset_type, reason))
-	end
+	local message = string.format("%s [color=yellow]%s[/color]", reset_type, reason or "An undocumented reason has triggered a reset. This is a bug. Please report")
+
+	print(message)
+
+	-- A 3 tick delay is needed to have this message show up after everyone respawns.
+	-- Otherwise, if there are enough players online, the reason will be above
+	-- the deaths and respawn notifications, and therefore not be viewible from
+	-- the client.
+
+	global.scheduled_actions:enqueue(function() game.print(message) end, game.tick + 3)
 end
 -----------------------------------------------------------------------------------------------
 local on_pre_surface_cleared = function(event) 
@@ -453,18 +491,17 @@ local on_player_toggled_map_editor = function(event)
 end
 ------------------------------------------------------------------------------------------
 local on_console_command = function(event)
-	local command = event.command
-	local parameters = event.parameters
-	print(command)
-	print(parameters)
+	local name = nil
+	if event.player_index ~= nil then
+		name = game.get_player(event.player_index).name
+	end
+	name = name or "SERVER"
+
+	print(string.format("[%s] /%s %s", name, event.command, event.parameters))
 	
 	if (game.console_command_used and global.restart ~= "true") then
 		global.restart = "true"
-		local name = nil
-		if event.player_index ~= nil then
-			name = game.get_player(event.player_index).name
-		end
-		reset(string.format("%s has used a console command.", name or "SERVER"))
+		reset(string.format("%s has used a console command.", name))
 	end
 end
 --------------------------------------------------------------------------------------------
@@ -548,17 +585,21 @@ local on_unit_group_finished_gathering = function(event)
 	end
 end
 -------------------------------------------------------------------------------------------
-script.on_nth_tick(60, function()
-	local surface = game.surfaces[1]
-	if not global.converted_shallow_water and game.ticks_played > SHALLOW_WATER_CONVERSION_DELAY then
-		global.converted_shallow_water = true
-		for chunk in surface.get_chunks() do
-			convert_shallow_water_in_area(chunk.area)	
+local on_tick = function()
+	-- Process scheduled tasks
+	-- if global.scheduled_actions == nil then 
+	-- 	global.scheduled_actions = priority_queue('min')
+	-- end
+	while not global.scheduled_actions:empty() do 
+		local f, tick_to_run = global.scheduled_actions:peek()
+		if tick_to_run ~= nil and tick_to_run <= game.tick then
+			f()
+			global.scheduled_actions:dequeue()
+		else
+			break
 		end
-		
-		chart_starting_area()
 	end
-end)
+end
 
 script.on_nth_tick(36000, function()
 	local evo = game.forces["enemy"].evolution_factor
@@ -1266,8 +1307,8 @@ freeplay.events =
 	[defines.events.on_console_command] = on_console_command,
 	[defines.events.on_player_toggled_map_editor] = on_player_toggled_map_editor,
 	[defines.events.on_research_cancelled] = on_research_cancelled,
-	[defines.events.on_research_started] = on_research_started
-	
+	[defines.events.on_research_started] = on_research_started,
+	[defines.events.on_tick] = on_tick
 }
 
 
